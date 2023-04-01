@@ -1,0 +1,6 @@
+bumpversion
+flake8
+jupyter
+jupytext
+pre-commit
+black
