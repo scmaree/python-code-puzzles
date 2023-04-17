@@ -24,3 +24,13 @@ def reciprocal_decimal_representation(d: int) -> tuple:
             break
     period = residuals.index(r)
     return representation[:period], representation[period:]
+
+
+def continued_fraction_to_fraction(seq):
+    """Convert the simple continued fraction in `seq` into a fraction, num / den
+    https://stackoverflow.com/questions/36077810/continued-fractions-python
+    """
+    n, d, num, den = 0, 1, 1, 0
+    for u in seq:
+        n, d, num, den = num, den, num * u + n, den * u + d
+    return num, den

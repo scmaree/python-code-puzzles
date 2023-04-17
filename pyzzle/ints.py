@@ -1,5 +1,8 @@
 from functools import reduce
 import math
+from typing import Generator
+
+from pyzzle import primes
 
 
 def is_odd(n: int) -> int:
@@ -204,3 +207,58 @@ def all_ints_digit_gen(n=0):
         if len(d) == 0:
             n += 1
             d = digits(n)
+
+
+def concatenate(*ints) -> int:
+    """Concatenate ints as a single number"""
+    return int("".join(str(i) for i in ints))
+
+
+def is_squarefree(n: int) -> bool:
+    """A positive integer n is called square-free, if no square of a prime divides n"""
+    for p in range(2, 1 + int(n**0.5)):
+        c = 0
+        while n % p == 0:
+            n, c = n // p, c + 1
+            if c == 2:
+                return False
+    return True
+
+
+def squarefree_numbers_below_n(n: int) -> Generator[int, None, None]:
+    for i in range(1, n):
+        if is_squarefree(i):
+            yield i
+
+
+def count_squarefree_numbers_below_n(n: int) -> int:
+    return len(list(squarefree_numbers_below_n(n)))
+
+
+def fast_count_squarefree_numbers_below_n(n):
+    """
+    Counts the ints below that are squarefree numbers
+    https://leetcode.com/problems/count-primes/solutions/1722436/python-2-meissel-lehmer-algorithm-28-ms-164-mb/
+    """
+    if n in [0, 1, 2]:
+        return 0
+
+    squared_primes = [p**2 for p in primes.primes_below_n(int(n**0.5))]
+    phi_cache = {}
+    pi_cache = {}
+
+    return primes.pi(n - 1, squared_primes, pi_cache, phi_cache)
+
+
+def reverse_and_sum(n):
+    """e.g. 32 -> 32 + 23 = 55"""
+    return n + int(str(n)[::-1])
+
+
+def is_lychrel(n, i=0, max_itt=50):
+    """ints that do not become palindrome with the reverse_and_sum_approach"""
+    while i <= max_itt:
+        i, n = i + 1, reverse_and_sum(n)
+        if is_palindrome(n):
+            return False
+    return True

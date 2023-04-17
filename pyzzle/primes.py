@@ -1,3 +1,6 @@
+from bisect import bisect
+import math
+
 from pyzzle import ints
 
 
@@ -76,17 +79,84 @@ def is_truncatable_prime(n: int) -> bool:
     return True
 
 
-def prime_gen() -> int:
+def prime_gen(limit=None) -> int:
     """Generator for prime numbers
-    Naive FAST approach, adapted from dawg at: https://stackoverflow.com/questions/15285534/isprime-function-for-python-language
+    Naive fast approach, adapted from dawg at: https://stackoverflow.com/questions/15285534/isprime-function-for-python-language
     """
-    for p in (2, 3, 5):
-        yield p
+    for n in (2, 3):
+        yield n
+    while limit is None or n <= limit:
+        # all primes > 3 are of the form 6n ± 1
+        n += 2
+        if is_prime(n):
+            yield n
 
-    while True:
-        p += 5
-        if is_prime(p):
-            yield p
-        p += 2
-        if is_prime(p):
-            yield p
+
+def phi(x, a, primes, phi_cache):
+    """
+    Implementation of the partial sieve function, which
+    counts the number of integers <= x with no prime factor less
+    than or equal to the ath prime.
+    """
+    # If value is cached, just return it
+    if (x, a) in phi_cache:
+        return phi_cache[(x, a)]
+
+    # Base case: phi(x, a) is the number of odd integers <= x
+    if a == 1:
+        return math.ceil(x / 2)
+
+    result = phi(x, a - 1, primes, phi_cache) - phi(x / primes[a - 1], a - 1, primes, phi_cache)
+    phi_cache[(x, a)] = result  # Memoize
+    return result
+
+
+def pi(x, primes, prime_limit, pi_cache, phi_cache):
+    """
+    Computes pi(x), the number of primes <= x, using
+    the Meissel-Lehmer algorithm.
+    """
+    # If value is cached, return it
+    if x in pi_cache:
+        return pi_cache[x]
+
+    # If x < limit, calculate pi(x) using a bisection
+    # algorithm over the sieved primes.
+    if x < prime_limit:
+        result = bisect(primes, x)
+        pi_cache[x] = result
+        return result
+
+    a = pi(int(x ** (1.0 / 4)), primes, prime_limit, pi_cache, phi_cache)
+    b = pi(int(x ** (1.0 / 2)), primes, prime_limit, pi_cache, phi_cache)
+    c = pi(int(x ** (1.0 / 3)), primes, prime_limit, pi_cache, phi_cache)
+
+    # This quantity must be integral,
+    # so we can just use integer division.
+    result = phi(x, a, primes, phi_cache) + (b + a - 2) * (b - a + 1) // 2
+
+    for i in range(a + 1, b + 1):
+        w = x // primes[i - 1]
+        b_i = pi(w**0.5, primes, prime_limit, pi_cache, phi_cache)
+        result = result - pi(w, primes, prime_limit, pi_cache, phi_cache)
+        if i <= c:
+            for j in range(i, b_i + 1):
+                result = result - pi(w // primes[j - 1], primes, prime_limit, pi_cache, phi_cache) + j - 1
+    pi_cache[x] = result
+    return result
+
+
+def count_primes_below_n(n):
+    """
+    Prime counting algorithm: number of primes below n
+    https://leetcode.com/problems/count-primes/solutions/1722436/python-2-meissel-lehmer-algorithm-28-ms-164-mb/
+    """
+    if n in [0, 1, 2]:
+        return 0
+
+    prime_limit = 100
+    primes = primes_below_n(prime_limit)
+    phi_cache = {}
+    pi_cache = {}
+
+    return pi(n - 1, primes, prime_limit, pi_cache, phi_cache)

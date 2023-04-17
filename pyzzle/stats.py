@@ -1,4 +1,5 @@
 import math
+from itertools import chain, combinations
 
 
 def n_th_lexicographic_permutation(ordinals: list, r: int = 1) -> list:
@@ -16,3 +17,17 @@ def n_th_lexicographic_permutation(ordinals: list, r: int = 1) -> list:
         r -= i * m
         del ords[i]
     return res
+
+
+def powerset(s: list):
+    """powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
+    https://stackoverflow.com/questions/1482308/how-to-get-all-subsets-of-a-set-powerset
+    """
+    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
+
+
+def powersubsets(s: list):
+    """powerset([1,2,3]) --> (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
+    https://stackoverflow.com/questions/1482308/how-to-get-all-subsets-of-a-set-powerset
+    """
+    return chain.from_iterable(combinations(s, r) for r in range(1, len(s)))
