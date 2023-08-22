@@ -26,6 +26,13 @@ def powerset(s: list):
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
 
 
+def non_empty_powersets(s: list):
+    """powerset([1,2,3]) --> (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3), (1, 2, 3, 4)
+    https://stackoverflow.com/questions/1482308/how-to-get-all-subsets-of-a-set-powerset
+    """
+    return chain.from_iterable(combinations(s, r) for r in range(1, len(s) + 1))
+
+
 def powersubsets(s: list):
     """powerset([1,2,3]) --> (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)
     https://stackoverflow.com/questions/1482308/how-to-get-all-subsets-of-a-set-powerset

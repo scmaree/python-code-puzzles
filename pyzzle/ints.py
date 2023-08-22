@@ -91,7 +91,9 @@ def is_sum_of_two_abundant_numbers(n: int, is_ab: list) -> bool:
 
 def digits(n: int) -> list:
     """return list of digits of number"""
-    return [int(c) for c in str(n)]
+    yield n % 10
+    while n := n // 10:
+        yield n % 10
 
 
 def from_digits(d: list) -> int:
@@ -250,9 +252,19 @@ def fast_count_squarefree_numbers_below_n(n):
     return primes.pi(n - 1, squared_primes, pi_cache, phi_cache)
 
 
+def polygonal_numbers(N, n):
+    """All polygonal numbers, trianguler, square, etc..."""
+    return ((N - 2) * n**2 + (4 - N) * n) // 2
+
+
 def reverse_and_sum(n):
     """e.g. 32 -> 32 + 23 = 55"""
     return n + int(str(n)[::-1])
+
+
+def reverse(n):
+    """e.g. 32 -> 32 + 23 = 55"""
+    return int(str(n)[::-1])
 
 
 def is_lychrel(n, i=0, max_itt=50):
@@ -262,3 +274,81 @@ def is_lychrel(n, i=0, max_itt=50):
         if is_palindrome(n):
             return False
     return True
+
+
+def get_number_of_digits(i) -> int:
+    return int(math.log10(i)) + 1
+
+
+def get_first_digits(i: int, n=2) -> int:
+    """returns first n digits of integer i: 1234 -> 12"""
+    return i // 10 ** (int(math.log10(i)) + 1 - n)
+
+
+def get_last_digits(i: int, n=2) -> int:
+    """returns last n digits of integer i: 1234 -> 34"""
+    return i % 10**n
+
+
+def p6_test_ordered_set(ns, order):
+    ns_rem = [ns[i].copy() for i in order]
+    for shape in range(6):
+        ends = set(get_last_digits(n) for n in ns_rem[shape])
+        starts = set(get_first_digits(n) for n in ns_rem[(shape + 1) % 6])
+        combis = ends.intersection(starts)
+        if combis == 0:
+            return 0
+        ns_rem[shape] = [n for n in ns_rem[shape] if get_last_digits(n) in combis]
+        ns_rem[(shape + 1) % 6] = [n for n in ns_rem[(shape + 1) % 6] if get_first_digits(n) in combis]
+
+    if any(len(n) != 1 for n in ns_rem):
+        return 0
+
+    return ns_rem
+
+
+def modular_pow(base, exponent, m):
+    """Or just use pow(base, exponent, m)"""
+    """ efficiently computes base**exponent % m.  From wikipedia:  """
+    if m == 1:
+        return 0
+    result = 1
+    base = base % m
+    while exponent > 0:
+        if exponent % 2 == 1:
+            result = (result * base) % m
+        exponent = exponent >> 1
+        base = (base * base) % m
+    return result
+
+
+def roman2arabic(num: str) -> int:
+    """converts roman to arabic: XXXXVIIII or LXIX -> 49"""
+    rc2a = {"I": 1, "V": 5, "X": 10, "L": 50, "C": 100, "D": 500, "M": 1000}
+    return sum(rc2a[c] if (i == len(num) - 1 or rc2a[num[i + 1]] <= rc2a[c]) else -rc2a[c] for i, c in enumerate(num))
+
+
+def arabic2roman(n: int) -> str:
+    """Converts arabic to roman: 49 -> LXIX. Returns minimal form using subtraction rule."""
+    a2rc = {
+        1000: "M",
+        900: "CM",
+        500: "D",
+        400: "CD",
+        100: "C",
+        90: "XC",
+        50: "L",
+        40: "XL",
+        10: "X",
+        9: "IX",
+        5: "V",
+        4: "IV",
+        1: "I",
+    }
+    r = ""
+    for k, v in a2rc.items():
+        while n >= k:
+            r += v
+            n -= k
+    assert n == 0
+    return r
